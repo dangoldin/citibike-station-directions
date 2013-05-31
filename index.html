@@ -94,7 +94,7 @@
       directionsDisplay.setMap(map);
       directionsDisplay.setPanel(document.getElementById("directions-panel"));
 
-      $.getJSON('/static/js/stations.json', function(data) {
+      $.getJSON('static/js/stations.json', function(data) {
         var bounds = new google.maps.LatLngBounds();
         $.each(data.stationBeanList, function(i, station) {
           if (station.statusValue == 'In Service') {
