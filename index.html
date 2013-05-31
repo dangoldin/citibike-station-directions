@@ -16,7 +16,7 @@
             I recently signed up for Citibike and realized there's no simple way of getting directions from station to station so I hacked this together using the wonderful Google Maps API.
           </p>
           <p>
-            To start, just click on the start and end stations to select them and hit the "Get Directions" button that will appear. To reset the map hit "Clear."
+            To start, just click on the start and end stations to select them and hit the "Get Directions" button that will appear. To reset the map hit "Reset."
           </p>
           <p>
             I got a lot of the code from the way the Citibike site itself generated the map and just plugged it into the Google Maps API to pull the directions. All the code can be found by looking at the source of the page.
@@ -35,7 +35,7 @@
         <div id="stations">
         </div>
         <a class="btn btn-primary" id="btn-get-directions" style="display:none;">Get Directions</a>
-        <a class="btn btn-secondary" id="btn-clear" style="display:none;">Clear</a>
+        <a class="btn btn-secondary" id="btn-reset" style="display:none;">Reset</a>
 
         <div id="directions-panel">
         </div>
@@ -52,34 +52,17 @@
     var map;
     var directionsService;
     var directionsDisplay;
+    var markersArray = [];
 
-    $('#btn-clear').click(function(){
-      $('#stations .station').remove();
-      $('#btn-get-directions').hide();
-      $('#btn-clear').hide();
-      $('#directions-panel').empty();
-    });
+    // From http://stackoverflow.com/questions/1544739/google-maps-api-v3-how-to-remove-all-markers
+    function clearMarkers() {
+      for (var i = 0; i < markersArray.length; i++ ) {
+        markersArray[i].setMap(null);
+      }
+      markersArray = [];
+    }
 
-    $('#btn-get-directions').click(function(){
-      var station1 = $('#stations .station').first();
-      var station2 = $('#stations .station').last();
-
-      var addr1 = station1.data('lat') + ',' + station1.data('lng');
-      var addr2 = station2.data('lat') + ',' + station2.data('lng');
-
-      var request = {
-        origin:addr1,
-        destination:addr2,
-        travelMode: google.maps.TravelMode.BICYCLING
-      };
-      directionsService.route(request, function(result, status) {
-        if (status == google.maps.DirectionsStatus.OK) {
-          directionsDisplay.setDirections(result);
-        }
-      });
-    });
-
-    $(document).ready(function(){
+    function drawMap() {
       var center = new google.maps.LatLng(40.704066,-73.992727);
       var mapOptions = {
         mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -106,14 +89,16 @@
               title : station.stationName
             });
 
+            markersArray.push(marker);
+
             google.maps.event.addListener(marker, 'click', function() {
               if ($('#stations .station').length >= 2) {
-                alert('Right now this only supports two stations. Hit clear to reset.');
-                $('#btn-clear').show();
+                alert('Right now this only supports two stations. Hit the reset button to start over.');
+                $('#btn-reset').show();
               } else {
-                $('#stations').append('<div class="station" data-lat="'+station.latitude+'" data-lng="'+station.longitude+'">'+station.stationName+'</div>');
+                $('#stations').append('<div class="station" data-station-id="'+station.id+'" data-lat="'+station.latitude+'" data-lng="'+station.longitude+'">'+station.stationName+'</div>');
 
-                $('#btn-clear').show();
+                $('#btn-reset').show();
 
                 if($('#stations .station').length == 2) {
                   $('#btn-get-directions').show();
@@ -127,6 +112,38 @@
           }
         });
         map.setCenter(bounds.getCenter(), map.fitBounds(bounds));
+      });
+    }
+
+    $(document).ready(function(){
+      drawMap();
+    });
+
+    $('#btn-reset').click(function(){
+      $('#stations .station').remove();
+      $('#btn-get-directions').hide();
+      $('#btn-reset').hide();
+      $('#directions-panel').empty();
+      drawMap();
+    });
+
+    $('#btn-get-directions').click(function(){
+      var station1 = $('#stations .station').first();
+      var station2 = $('#stations .station').last();
+
+      var addr1 = station1.data('lat') + ',' + station1.data('lng');
+      var addr2 = station2.data('lat') + ',' + station2.data('lng');
+
+      var request = {
+        origin:addr1,
+        destination:addr2,
+        travelMode: google.maps.TravelMode.BICYCLING
+      };
+      directionsService.route(request, function(result, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+          clearMarkers();
+          directionsDisplay.setDirections(result);
+        }
       });
     });
   </script>
