@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Citibike Station to Station Directions</title>
+  <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="static/css/bootstrap-responsive.min.css">
+  <link rel="stylesheet" type="text/css" href="static/css/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="span12">
+        <h1>Citibike Station to Station Directions</h1>
+        <div class="well">
+          <p>
+            I recently signed up for <a href="http://citibikenyc.com/" target="_blank">Citibike</a> and realized there's no simple way of getting directions from station to station so I hacked this together using the wonderful Google Maps API.
+          </p>
+          <p>
+            To start, just click on the start and end stations to select them and hit the "Get Directions" button that will appear. To reset the map hit "Reset."
+          </p>
+          <p>
+            I got a lot of the code from the way the Citibike site itself <a href="http://citibikenyc.com/stations" target="_blank">generated the map</a> and just plugged it into the Google Maps API to pull the directions. All the code can be found by looking at the source of the page.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="span7">
+        <div id="map" style="width:100%; height:500px;">
+        </div>
+      </div>
+      <div class="span5" id="results">
+        <h3>Directions</h3>
+        <form class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="start">Start</label>
+            <div class="controls">
+              <input type="text" id="id_start" placeholder="Starting address" class="addr-input">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="end">End</label>
+            <div class="controls">
+              <input type="text" id="id_end" placeholder="Ending address" class="addr-input">
+            </div>
+          </div>
+
+           <div class="control-group">
+            <div class="controls">
+              <a class="btn btn-primary" id="btn-get-directions">Get Directions</a>
+              <a class="btn btn-secondary" id="btn-reset">Reset</a>
+            </div>
+          </div>
+        </form>
+
+        <div id="stations">
+        </div>
+
+        <div id="directions-panel">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;sensor=false"></script>
+
+  <script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+
+  <script type="text/javascript">
+    var map;
+    var directionsService;
+    var directionsDisplay;
+    var markersArray = [];
+    var stations;
+
+    function getDistance(lat1,lng1,lat2,lng2) {
+      var i = lat1 - lat2;
+      var j = lng1 - lng2;
+      return i*i + j*j;
+    }
+
+    function findNearestStation(lat,lng) {
+      var min_distance = 99999;
+      var closest_station_id;
+      $.each(stations.stationBeanList, function(i, station) {
+        var distance = getDistance(lat,lng, station.latitude, station.longitude);
+
+        if (distance < min_distance) {
+          min_distance = distance;
+          closest_station_id = i;
+        }
+      });
+
+      console.log('Closest: ' + closest_station_id);
+
+      return stations.stationBeanList[closest_station_id];
+    }
+
+    // From http://stackoverflow.com/questions/1544739/google-maps-api-v3-how-to-remove-all-markers
+    function clearMarkers() {
+      for (var i = 0; i < markersArray.length; i++ ) {
+        markersArray[i].setMap(null);
+      }
+      markersArray = [];
+    }
+
+    function drawMap() {
+      var center = new google.maps.LatLng(40.704066,-73.992727);
+      var mapOptions = {
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU },
+        zoom: 14,
+        center: center
+      };
+
+      map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      directionsService = new google.maps.DirectionsService();
+      directionsDisplay = new google.maps.DirectionsRenderer();
+      directionsDisplay.setMap(map);
+      directionsDisplay.setPanel(document.getElementById("directions-panel"));
+
+      $.getJSON('static/js/stations.json', function(data) {
+        stations = data;
+        var bounds = new google.maps.LatLngBounds();
+        $.each(data.stationBeanList, function(i, station) {
+          if (station.statusValue == 'In Service') {
+            var point = new google.maps.LatLng(station.latitude, station.longitude);
+
+            var marker = new google.maps.Marker({
+              position : point,
+              map : map,
+              title : station.stationName
+            });
+
+            markersArray.push(marker);
+
+            google.maps.event.addListener(marker, 'click', function() {
+              if ($('#stations .station').length >= 2) {
+                alert('Right now this only supports two stations. Hit the reset button to start over.');
+                $('#btn-reset').show();
+              } else {
+                $('#stations').append('<div class="station" data-station-id="'+station.id+'" data-lat="'+station.latitude+'" data-lng="'+station.longitude+'">'+station.stationName+'</div>');
+
+                $('#btn-reset').show();
+
+                if($('#stations .station').length == 2) {
+                  $('#btn-get-directions').show();
+                } else {
+                  $('#btn-get-directions').hide();
+                }
+              }
+            });
+
+            bounds.extend(point);
+          }
+        });
+        map.setCenter(bounds.getCenter(), map.fitBounds(bounds));
+      });
+    }
+
+    $(document).ready(function(){
+      drawMap();
+    });
+
+    var autocomplete_start = new google.maps.places.Autocomplete(document.getElementById("id_start"));
+    var autocomplete_end = new google.maps.places.Autocomplete(document.getElementById("id_end"))
+
+    $('#btn-reset').click(function(){
+      $('#stations .station').remove();
+      $('#btn-get-directions').hide();
+      $('#btn-reset').hide();
+      $('#directions-panel').empty();
+      drawMap();
+    });
+
+    $('#btn-get-directions').click(function(){
+      var start = autocomplete_start.getPlace();
+      var end   = autocomplete_end.getPlace();
+
+      var start_lat = start.geometry.location.lat();
+      var start_lng = start.geometry.location.lng();
+
+      var end_lat = end.geometry.location.lat();
+      var end_lng = end.geometry.location.lng();
+
+      var start_station = findNearestStation(start_lat,start_lng);
+      var end_station = findNearestStation(end_lat,end_lng);
+
+      var addr1 = start_station.latitude + ',' + start_station.longitude;
+      var addr2 = end_station.latitude + ',' + end_station.longitude;
+
+      // var station1 = $('#stations .station').first();
+      // var station2 = $('#stations .station').last();
+      // var addr1 = station1.data('lat') + ',' + station1.data('lng');
+      // var addr2 = station2.data('lat') + ',' + station2.data('lng');
+
+      var request = {
+        origin:addr1,
+        destination:addr2,
+        travelMode: google.maps.TravelMode.BICYCLING
+      };
+      directionsService.route(request, function(result, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+          clearMarkers();
+          directionsDisplay.setDirections(result);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
