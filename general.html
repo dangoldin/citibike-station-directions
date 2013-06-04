@@ -160,37 +160,10 @@
         $.each(data.stationBeanList, function(i, station) {
           if (station.statusValue == 'In Service') {
             var point = new google.maps.LatLng(station.latitude, station.longitude);
-
-            // var marker = new google.maps.Marker({
-            //   position : point,
-            //   map : map,
-            //   title : station.stationName
-            // });
-
-            // markersArray.push(marker);
-
-            // google.maps.event.addListener(marker, 'click', function() {
-            //   if ($('#stations .station').length >= 2) {
-            //     alert('Right now this only supports two stations. Hit the reset button to start over.');
-            //     $('#btn-reset').show();
-            //   } else {
-            //     $('#stations').append('<div class="station" data-station-id="'+station.id+'" data-lat="'+station.latitude+'" data-lng="'+station.longitude+'">'+station.stationName+'</div>');
-
-            //     $('#btn-reset').show();
-
-            //     if($('#stations .station').length == 2) {
-            //       $('#btn-get-directions').show();
-            //     } else {
-            //       $('#btn-get-directions').hide();
-            //     }
-            //   }
-            // });
-
             bounds.extend(point);
           }
         });
         map.setCenter(bounds.getCenter(), map.fitBounds(bounds));
-
         autocomplete_start.bindTo('bounds', map);
         autocomplete_end.bindTo('bounds', map);
       });
@@ -259,7 +232,7 @@
         if (status == google.maps.DirectionsStatus.OK) {
           // clearMarkers();
           directionsDisplay1.setDirections(result);
-          map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
+          // map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
 
           $('#directions-info1').html('Walk from ' + $('#id_start').val() + ' to station at ' + start_station.stationName);
         }
@@ -275,7 +248,7 @@
         if (status == google.maps.DirectionsStatus.OK) {
           // clearMarkers();
           directionsDisplay2.setDirections(result);
-          map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
+          // map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
 
           $('#directions-info3').html('Bike from station at ' + start_station.stationName + ' to station at ' + end_station.stationName);
         }
@@ -291,10 +264,20 @@
         if (status == google.maps.DirectionsStatus.OK) {
           // clearMarkers();
           directionsDisplay3.setDirections(result);
-          map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
+          // map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
 
           $('#directions-info3').html('Walk from station at ' + end_station.stationName + ' to ' + $('#id_end').val() );
         }
+      });
+
+      google.maps.event.addListener(directionsDisplay1, 'directions_changed', function() {
+        map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
+      });
+      google.maps.event.addListener(directionsDisplay2, 'directions_changed', function() {
+        map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
+      });
+      google.maps.event.addListener(directionsDisplay3, 'directions_changed', function() {
+        map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
       });
     });
   </script>
