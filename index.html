@@ -37,13 +37,15 @@
           <div class="control-group">
             <label class="control-label" for="start">Start</label>
             <div class="controls">
-              <input type="text" id="id_start" placeholder="Starting address" class="addr-input">
+              <!-- <input type="text" id="id_start" placeholder="Starting address" class="addr-input" value="36 East 31st Street, New York, NY, United States"> -->
+              <input type="text" id="id_start" placeholder="Starting address" class="addr-input" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="end">End</label>
             <div class="controls">
-              <input type="text" id="id_end" placeholder="Ending address" class="addr-input">
+              <!-- <input type="text" id="id_end" placeholder="Ending address" class="addr-input" value="36 West 20th Street, New York, NY, United States"> -->
+              <input type="text" id="id_end" placeholder="Ending address" class="addr-input" />
             </div>
           </div>
 
@@ -106,8 +108,6 @@
           closest_station_id = i;
         }
       });
-
-      console.log('Closest station idx: ' + closest_station_id);
 
       return stations.stationBeanList[closest_station_id];
     }
@@ -221,6 +221,7 @@
       directionsService.route(request1, function(result, status) {
         if (status == google.maps.DirectionsStatus.OK) {
           $('#directions-info1').html('Walk from ' + $('#id_start').val() + ' to station at ' + start_station.stationName);
+          dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay1.setDirections(result);
         }
       });
@@ -234,6 +235,7 @@
       directionsService.route(request2, function(result, status) {
         if (status == google.maps.DirectionsStatus.OK) {
           $('#directions-info2').html('Bike from station at ' + start_station.stationName + ' to station at ' + end_station.stationName);
+          dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay2.setDirections(result);
         }
       });
@@ -247,18 +249,28 @@
       directionsService.route(request3, function(result, status) {
         if (status == google.maps.DirectionsStatus.OK) {
           $('#directions-info3').html('Walk from station at ' + end_station.stationName + ' to ' + $('#id_end').val() );
+          dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay3.setDirections(result);
         }
       });
 
       google.maps.event.addListener(directionsDisplay1, 'directions_changed', function() {
-        map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
+        map.fitBounds(dir_bounds);
+        window.setTimeout(function() {
+          map.fitBounds(dir_bounds);
+        }, 50);
       });
       google.maps.event.addListener(directionsDisplay2, 'directions_changed', function() {
-        map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
+        map.fitBounds(dir_bounds);
+        window.setTimeout(function() {
+          map.fitBounds(dir_bounds);
+        }, 50);
       });
       google.maps.event.addListener(directionsDisplay3, 'directions_changed', function() {
-        map.setCenter(dir_bounds.getCenter(), map.fitBounds(dir_bounds));
+        map.fitBounds(dir_bounds);
+        window.setTimeout(function() {
+          map.fitBounds(dir_bounds);
+        }, 50);
       });
     });
   </script>
