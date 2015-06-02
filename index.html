@@ -158,7 +158,7 @@
         stations = data;
         var bounds = new google.maps.LatLngBounds();
         $.each(data.stationBeanList, function(i, station) {
-          if (station.statusValue == 'In Service') {
+          if (station.statusValue == 'In Service' && station.availableBikes > 0) {
             var point = new google.maps.LatLng(station.latitude, station.longitude);
             bounds.extend(point);
           }
