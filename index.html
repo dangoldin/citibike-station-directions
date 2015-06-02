@@ -154,7 +154,7 @@
       directionsDisplay3.setMap(map);
       directionsDisplay3.setPanel(document.getElementById("directions-panel3"));
 
-      $.getJSON('static/js/stations.json', function(data) {
+      var loadStations = function(data) {
         stations = data;
         var bounds = new google.maps.LatLngBounds();
         $.each(data.stationBeanList, function(i, station) {
@@ -166,6 +166,14 @@
         map.setCenter(bounds.getCenter(), map.fitBounds(bounds));
         autocomplete_start.bindTo('bounds', map);
         autocomplete_end.bindTo('bounds', map);
+      }
+
+      $.getJSON('https://jsonp.afeld.me/?url=http://www.citibikenyc.com/stations/json', function(data){
+        if (data) {
+          loadStations(data);
+        } else {
+          $.getJSON('static/js/stations.json', loadStations);
+        }
       });
     }
 
