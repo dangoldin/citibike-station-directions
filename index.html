@@ -267,23 +267,13 @@
         }
       });
 
-      google.maps.event.addListener(directionsDisplay1, 'directions_changed', function() {
-        map.fitBounds(dir_bounds);
-        window.setTimeout(function() {
+      [directionsDisplay1, directionsDisplay2, directionsDisplay3].forEach(function(el) {
+        google.maps.event.addListener(el, 'directions_changed', function() {
           map.fitBounds(dir_bounds);
-        }, 50);
-      });
-      google.maps.event.addListener(directionsDisplay2, 'directions_changed', function() {
-        map.fitBounds(dir_bounds);
-        window.setTimeout(function() {
-          map.fitBounds(dir_bounds);
-        }, 50);
-      });
-      google.maps.event.addListener(directionsDisplay3, 'directions_changed', function() {
-        map.fitBounds(dir_bounds);
-        window.setTimeout(function() {
-          map.fitBounds(dir_bounds);
-        }, 50);
+          window.setTimeout(function() {
+            map.fitBounds(dir_bounds);
+          }, 50);
+        });
       });
     });
   </script>
