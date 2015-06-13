@@ -43,7 +43,7 @@
             <label class="control-label" for="start">Start</label>
             <div class="controls">
               <!-- <input type="text" id="id_start" placeholder="Starting address" class="addr-input" value="36 East 31st Street, New York, NY, United States"> -->
-              <input type="text" id="id_start" placeholder="Starting address" class="addr-input" />
+              <input type="text" id="id_start" placeholder="Starting address (blank for auto)" class="addr-input" />
             </div>
           </div>
           <div class="control-group">
@@ -88,6 +88,7 @@
     var directionsDisplay1, directionsDisplay2, directionsDisplay3;
     var markersArray = [];
     var stations;
+    var autoDetectedStartLat, autoDetectedStartLng;
 
     var autocomplete_options = {
       componentRestrictions: {country: 'us'}
@@ -182,8 +183,36 @@
       });
     }
 
+    function getLocation() {
+      var options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      };
+
+      function success(pos) {
+        var crd = pos.coords;
+
+        console.log('Your current position is:');
+        console.log('Latitude : ' + crd.latitude);
+        console.log('Longitude: ' + crd.longitude);
+        console.log('More or less ' + crd.accuracy + ' meters.');
+
+        autoDetectedStartLat = crd.latitude;
+        autoDetectedStartLng = crd.longitude;
+      };
+
+      function error(err) {
+        console.warn('ERROR(' + err.code + '): ' + err.message);
+      };
+
+      navigator.geolocation.getCurrentPosition(success, error, options);
+    }
+
+
     $(document).ready(function(){
       drawMap();
+      getLocation();
     });
 
     $('#btn-reset').click(function(){
@@ -197,7 +226,19 @@
     });
 
     $('#btn-get-directions').click(function(){
-      var start = autocomplete_start.getPlace();
+      var start;
+      if (!$('id_start').val()) {
+        start = {
+          geometry: {
+            location: {
+              lat: function() { return autoDetectedStartLat; },
+              lng: function() { return autoDetectedStartLng; }
+            }
+          }
+        }
+      } else {
+        start = autocomplete_start.getPlace();
+      }
       var end   = autocomplete_end.getPlace();
 
       var start_lat = start.geometry.location.lat();
