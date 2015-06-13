@@ -183,7 +183,7 @@
       });
     }
 
-    function getLocation() {
+    function getLocation(callback) {
       var options = {
         enableHighAccuracy: true,
         timeout: 5000,
@@ -200,32 +200,26 @@
 
         autoDetectedStartLat = crd.latitude;
         autoDetectedStartLng = crd.longitude;
+
+        if (callback) {
+          callback();
+        }
       };
 
       function error(err) {
         console.warn('ERROR(' + err.code + '): ' + err.message);
       };
 
+      if (autoDetectedStartLat && autoDetectedStartLng) {
+        if (callback) {
+          callback();
+          return;
+        }
+      }
       navigator.geolocation.getCurrentPosition(success, error, options);
     }
 
-
-    $(document).ready(function(){
-      drawMap();
-      getLocation();
-    });
-
-    $('#btn-reset').click(function(){
-      $('#directions-panel1').empty();
-      $('#directions-panel2').empty();
-      $('#directions-panel3').empty();
-      $('#directions-info1').empty();
-      $('#directions-info2').empty();
-      $('#directions-info3').empty();
-      drawMap();
-    });
-
-    $('#btn-get-directions').click(function(){
+    function getDirections() {
       var start;
       if (!$('id_start').val()) {
         start = {
@@ -239,7 +233,7 @@
       } else {
         start = autocomplete_start.getPlace();
       }
-      var end   = autocomplete_end.getPlace();
+      var end = autocomplete_end.getPlace();
 
       var start_lat = start.geometry.location.lat();
       var start_lng = start.geometry.location.lng();
@@ -316,6 +310,29 @@
           }, 50);
         });
       });
+    }
+
+    $(document).ready(function(){
+      drawMap();
+      getLocation();
+    });
+
+    $('#btn-reset').click(function(){
+      $('#directions-panel1').empty();
+      $('#directions-panel2').empty();
+      $('#directions-panel3').empty();
+      $('#directions-info1').empty();
+      $('#directions-info2').empty();
+      $('#directions-info3').empty();
+      drawMap();
+    });
+
+    $('#btn-get-directions').click(function(){
+      if (!$('#id_start').val()) {
+        getLocation(getDirections);
+      } else {
+        getDirections();
+      }
     });
   </script>
   <script>
