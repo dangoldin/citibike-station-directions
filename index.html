@@ -174,13 +174,19 @@
         autocomplete_end.bindTo('bounds', map);
       }
 
-      $.getJSON('https://jsonp.afeld.me/?url=http://www.citibikenyc.com/stations/json', function(data){
-        if (data) {
-          loadStations(data);
-        } else {
-          $.getJSON('static/js/stations.json', loadStations);
-        }
-      });
+      try {
+        $.getJSON('https://jsonp.afeld.me/?url='+encodeURIComponent('http://www.citibikenyc.com/stations/json'), function(data){
+          if (data) {
+            loadStations(data);
+          } else {
+            console.log("No stations retrieved");
+            $.getJSON('static/js/stations.json', loadStations);
+          }
+        });
+      } catch (err) {
+        console.log("Failed to fetch latest stations");
+        $.getJSON('static/js/stations.json', loadStations);
+      }
     }
 
     function getLocation(callback) {
@@ -219,9 +225,16 @@
       navigator.geolocation.getCurrentPosition(success, error, options);
     }
 
+    function printStationInfo(station) {
+      return station.stationName + ' (' + station.availableBikes + '/' + station.availableDocks + ' bikes)';
+    }
+
     function getDirections() {
+      clearMarkers();
+      drawMap();
+
       var start;
-      if (!$('id_start').val()) {
+      if (!($('#id_start').val())) {
         start = {
           geometry: {
             location: {
@@ -255,8 +268,8 @@
       dir_bounds.extend(end_station_p);
 
       drawMarker(start_lat, start_lng, map, $('#id_start').val(), '1');
-      drawMarker(start_station.latitude, start_station.longitude, map, start_station.stationName, '2');
-      drawMarker(end_station.latitude, end_station.longitude, map, end_station.stationName, '3');
+      drawMarker(start_station.latitude, start_station.longitude, map, printStationInfo(start_station), '2');
+      drawMarker(end_station.latitude, end_station.longitude, map, printStationInfo(end_station), '3');
       drawMarker(end_lat, end_lng, map, $('#id_end').val(), '4');
 
       // We'll make 3 calls, 1) walking, 2) biking, 3) walking
@@ -268,7 +281,7 @@
       };
       directionsService.route(request1, function(result, status) {
         if (status == google.maps.DirectionsStatus.OK) {
-          $('#directions-info1').html('Walk from ' + $('#id_start').val() + ' to station at ' + start_station.stationName);
+          $('#directions-info1').html('Walk from ' + $('#id_start').val() + ' to station at ' + printStationInfo(start_station));
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay1.setDirections(result);
         }
@@ -282,7 +295,7 @@
       };
       directionsService.route(request2, function(result, status) {
         if (status == google.maps.DirectionsStatus.OK) {
-          $('#directions-info2').html('Bike from station at ' + start_station.stationName + ' to station at ' + end_station.stationName);
+          $('#directions-info2').html('Bike from station at ' + printStationInfo(start_station) + ' to station at ' + printStationInfo(end_station));
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay2.setDirections(result);
         }
@@ -296,7 +309,7 @@
       };
       directionsService.route(request3, function(result, status) {
         if (status == google.maps.DirectionsStatus.OK) {
-          $('#directions-info3').html('Walk from station at ' + end_station.stationName + ' to ' + $('#id_end').val() );
+          $('#directions-info3').html('Walk from station at ' + printStationInfo(end_station) + ' to ' + $('#id_end').val() );
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay3.setDirections(result);
         }
@@ -328,9 +341,11 @@
     });
 
     $('#btn-get-directions').click(function(){
-      if (!$('#id_start').val()) {
+      if (!($('#id_start').val())) {
+        console.log('Autdetect Location + Directions');
         getLocation(getDirections);
       } else {
+        console.log('Directions');
         getDirections();
       }
     });
