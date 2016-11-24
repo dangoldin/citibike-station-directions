@@ -32,25 +32,25 @@
     </div>
 
     <div class="row">
-      <div class="span7">
+      <div class="span6">
         <div id="map" style="width:100%; height:500px;">
         </div>
       </div>
-      <div class="span5" id="results">
+      <div class="span6" id="results">
         <h3>Directions</h3>
         <form class="form-horizontal">
           <div class="control-group">
             <label class="control-label" for="start">Start</label>
             <div class="controls">
-              <!-- <input type="text" id="id_start" placeholder="Starting address" class="addr-input" value="36 East 31st Street, New York, NY, United States"> -->
-              <input type="text" id="id_start" placeholder="Starting address (blank for auto)" class="addr-input" />
+              <input type="text" id="id_start" placeholder="Starting address" class="addr-input" value="Razorfish Health, Park Avenue South, New York, NY, United States">
+              <!-- <input type="text" id="id_start" placeholder="Starting address (blank for auto)" class="addr-input" /> -->
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="end">End</label>
             <div class="controls">
-              <!-- <input type="text" id="id_end" placeholder="Ending address" class="addr-input" value="36 West 20th Street, New York, NY, United States"> -->
-              <input type="text" id="id_end" placeholder="Ending address" class="addr-input" />
+              <input type="text" id="id_end" placeholder="Ending address" class="addr-input" value="New York Sports Clubs, Irving Place, New York, NY, United States">
+              <!-- <input type="text" id="id_end" placeholder="Ending address" class="addr-input" /> -->
             </div>
           </div>
 
@@ -150,12 +150,15 @@
 
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
       directionsService = new google.maps.DirectionsService();
+
       directionsDisplay1 = new google.maps.DirectionsRenderer();
       directionsDisplay1.setMap(map);
       directionsDisplay1.setPanel(document.getElementById("directions-panel1"));
+
       directionsDisplay2 = new google.maps.DirectionsRenderer();
       directionsDisplay2.setMap(map);
       directionsDisplay2.setPanel(document.getElementById("directions-panel2"));
+
       directionsDisplay3 = new google.maps.DirectionsRenderer();
       directionsDisplay3.setMap(map);
       directionsDisplay3.setPanel(document.getElementById("directions-panel3"));
@@ -169,13 +172,15 @@
             bounds.extend(point);
           }
         });
-        map.setCenter(bounds.getCenter(), map.fitBounds(bounds));
+        // TODO: Get this working
+        // doMapFit(map, bounds);
         autocomplete_start.bindTo('bounds', map);
         autocomplete_end.bindTo('bounds', map);
       }
 
       try {
-        $.getJSON('https://jsonp.afeld.me/?url='+encodeURIComponent('http://www.citibikenyc.com/stations/json'), function(data){
+        var citibikeUrl = 'https://feeds.citibikenyc.com/stations/stations.json';
+        $.getJSON('http://cors.io/?'+citibikeUrl, function(data){
           if (data) {
             loadStations(data);
           } else {
@@ -199,10 +204,10 @@
       function success(pos) {
         var crd = pos.coords;
 
-        console.log('Your current position is:');
-        console.log('Latitude : ' + crd.latitude);
-        console.log('Longitude: ' + crd.longitude);
-        console.log('More or less ' + crd.accuracy + ' meters.');
+        // console.log('Your current position is:');
+        // console.log('Latitude : ' + crd.latitude);
+        // console.log('Longitude: ' + crd.longitude);
+        // console.log('More or less ' + crd.accuracy + ' meters.');
 
         autoDetectedStartLat = crd.latitude;
         autoDetectedStartLng = crd.longitude;
@@ -272,6 +277,8 @@
       drawMarker(end_station.latitude, end_station.longitude, map, printStationInfo(end_station), '3');
       drawMarker(end_lat, end_lng, map, $('#id_end').val(), '4');
 
+      var num_retrieved = 0;
+
       // We'll make 3 calls, 1) walking, 2) biking, 3) walking
       // Walk from start to station 1
       var request1 = {
@@ -284,6 +291,11 @@
           $('#directions-info1').html('Walk from ' + $('#id_start').val() + ' to station at ' + printStationInfo(start_station));
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay1.setDirections(result);
+          num_retrieved++;
+
+          if (num_retrieved == 3) {
+            doMapFit(map, dir_bounds);
+          }
         }
       });
 
@@ -298,6 +310,11 @@
           $('#directions-info2').html('Bike from station at ' + printStationInfo(start_station) + ' to station at ' + printStationInfo(end_station));
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay2.setDirections(result);
+          num_retrieved++;
+
+          if (num_retrieved == 3) {
+            doMapFit(map, dir_bounds);
+          }
         }
       });
 
@@ -312,17 +329,19 @@
           $('#directions-info3').html('Walk from station at ' + printStationInfo(end_station) + ' to ' + $('#id_end').val() );
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay3.setDirections(result);
+          num_retrieved++;
+
+          if (num_retrieved == 3) {
+            doMapFit(map, dir_bounds);
+          }
         }
       });
+    }
 
-      [directionsDisplay1, directionsDisplay2, directionsDisplay3].forEach(function(el) {
-        google.maps.event.addListener(el, 'directions_changed', function() {
-          map.fitBounds(dir_bounds);
-          window.setTimeout(function() {
-            map.fitBounds(dir_bounds);
-          }, 50);
-        });
-      });
+    function doMapFit(map, bounds) {
+      setTimeout(function() {
+        map.fitBounds(bounds);
+      }, 150);
     }
 
     $(document).ready(function(){
@@ -342,10 +361,8 @@
 
     $('#btn-get-directions').click(function(){
       if (!($('#id_start').val())) {
-        console.log('Autdetect Location + Directions');
         getLocation(getDirections);
       } else {
-        console.log('Directions');
         getDirections();
       }
     });
