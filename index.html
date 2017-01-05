@@ -179,8 +179,9 @@
       }
 
       try {
+        var corsProxy = 'https://crossorigin.me/'; // 'http://cors.io/?'
         var citibikeUrl = 'https://feeds.citibikenyc.com/stations/stations.json';
-        $.getJSON('http://cors.io/?'+citibikeUrl, function(data){
+        $.getJSON(corsProxy+citibikeUrl, function(data){
           if (data) {
             loadStations(data);
           } else {
