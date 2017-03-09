@@ -65,6 +65,8 @@
         <div id="stations">
         </div>
 
+        <div><h4 id="directions-summary" style="text-align: center"></h4></div>
+
         <div><h4 id="directions-info1"></h4></div>
         <div id="directions-panel1"></div>
 
@@ -140,9 +142,10 @@
     }
 
     function clearPanels() {
-      $('#directions-panel1').html('');
-      $('#directions-panel2').html('');
-      $('#directions-panel3').html('');
+      $('#directions-summary').empty();
+      $('#directions-panel1').empty();
+      $('#directions-panel2').empty();
+      $('#directions-panel3').empty();
     }
 
     function drawMap() {
@@ -285,7 +288,8 @@
       drawMarker(end_station.latitude, end_station.longitude, map, printStationInfo(end_station), '3');
       drawMarker(end_lat, end_lng, map, $('#id_end').val(), '4');
 
-      var num_retrieved = 0;
+      var num_retrieved = 0,
+          total_time = 0;
 
       // We'll make 3 calls, 1) walking, 2) biking, 3) walking
       // Walk from start to station 1
@@ -300,9 +304,11 @@
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay1.setDirections(result);
           num_retrieved++;
+          total_time += result.routes[0].legs[0].duration.value
 
           if (num_retrieved == 3) {
             doMapFit(map, dir_bounds);
+            $('#directions-summary').html("Total time: " + Math.round(total_time/60) + " mins");
           }
         }
       });
@@ -319,9 +325,11 @@
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay2.setDirections(result);
           num_retrieved++;
+          total_time += result.routes[0].legs[0].duration.value
 
           if (num_retrieved == 3) {
             doMapFit(map, dir_bounds);
+            $('#directions-summary').html("Total time: " + Math.round(total_time/60) + " mins");
           }
         }
       });
@@ -338,9 +346,11 @@
           dir_bounds = dir_bounds.union( result.routes[0].bounds );
           directionsDisplay3.setDirections(result);
           num_retrieved++;
+          total_time += result.routes[0].legs[0].duration.value
 
           if (num_retrieved == 3) {
             doMapFit(map, dir_bounds);
+            $('#directions-summary').html("Total time: " + Math.round(total_time/60) + " mins");
           }
         }
       });
@@ -358,6 +368,7 @@
     });
 
     $('#btn-reset').click(function(){
+      $('#directions-summary').empty();
       $('#directions-panel1').empty();
       $('#directions-panel2').empty();
       $('#directions-panel3').empty();
