@@ -139,6 +139,12 @@
       markersArray = [];
     }
 
+    function clearPanels() {
+      $('#directions-panel1').html('');
+      $('#directions-panel2').html('');
+      $('#directions-panel3').html('');
+    }
+
     function drawMap() {
       var center = new google.maps.LatLng(40.704066,-73.992727);
       var mapOptions = {
@@ -237,6 +243,7 @@
 
     function getDirections() {
       clearMarkers();
+      clearPanels();
       drawMap();
 
       var start;
