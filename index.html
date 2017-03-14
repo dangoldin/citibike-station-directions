@@ -7,6 +7,8 @@
   <meta name="keywords" content="citibike, directions, station to station" />
   <meta name="author" content="Dan Goldin">
 
+  <link rel="shortcut icon" type="image/png" href="/static/img/favicon.png"/>
+
   <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="static/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" type="text/css" href="static/css/style.css">
@@ -368,6 +370,7 @@
     });
 
     $('#btn-reset').click(function(){
+
       $('#directions-summary').empty();
       $('#directions-panel1').empty();
       $('#directions-panel2').empty();
@@ -375,6 +378,8 @@
       $('#directions-info1').empty();
       $('#directions-info2').empty();
       $('#directions-info3').empty();
+      $('#id_start').val('');
+      $('#id_end').val('');
       drawMap();
     });
 
