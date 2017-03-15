@@ -9,6 +9,9 @@
 
   <link rel="shortcut icon" type="image/png" href="/static/img/favicon.png"/>
 
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700' rel='stylesheet' type='text/css'>
+
   <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="static/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" type="text/css" href="static/css/style.css">
@@ -34,25 +37,24 @@
     </div>
 
     <div class="row">
-      <div class="span6">
+      <div class="span12">
         <div id="map" style="width:100%; height:500px;">
         </div>
       </div>
-      <div class="span6" id="results">
-        <h3>Directions</h3>
+    </div
+    <div class="row">
+      <div class="span12" id="results">
         <form class="form-horizontal">
           <div class="control-group">
             <label class="control-label" for="start">Start</label>
             <div class="controls">
-              <!-- <input type="text" id="id_start" placeholder="Starting address" class="addr-input" value="Razorfish Health, Park Avenue South, New York, NY, United States"> -->
-              <input type="text" id="id_start" placeholder="Starting address (blank for auto)" class="addr-input" />
+              <input type="text" id="id_start" placeholder="Starting address (blank for auto)" class="span6" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="end">End</label>
             <div class="controls">
-              <!-- <input type="text" id="id_end" placeholder="Ending address" class="addr-input" value="New York Sports Clubs, Irving Place, New York, NY, United States"> -->
-              <input type="text" id="id_end" placeholder="Ending address" class="addr-input" />
+              <input type="text" id="id_end" placeholder="Ending address" class="span6" />
             </div>
           </div>
 
