@@ -21,3 +21,7 @@ p, label, input, button, select, textarea, select, input[type="text"], .btn {
 #results {
     padding-top: 20px;
 }
+
+#show-about {
+    margin-bottom: 10px;
+}
