@@ -1,7 +1,7 @@
 body {
     font-family: "Helvetica Neue", "Open Sans", Arial, Helvetica, sans-serif;
-    font-size: 22px;
-    line-height: 26px;
+    font-size: 18px;
+    line-height: 22px;
 }
 
 h1 {
@@ -9,13 +9,13 @@ h1 {
 }
 
 h4 {
-    font-size: 20px;
-    line-height: 26px;
+    font-size: 18px;
+    line-height: 22px;
 }
 
 p, label, input, button, select, textarea, select, input[type="text"], .btn {
-    font-size: 22px;
-    line-height: 26px;
+    font-size: 18px;
+    line-height: 22px;
 }
 
 #results {
