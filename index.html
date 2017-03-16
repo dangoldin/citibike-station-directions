@@ -198,21 +198,26 @@
         autocomplete_end.bindTo('bounds', map);
       }
 
-      try {
-        var corsProxy = 'https://crossorigin.me/'; // 'http://cors.io/?'
-        var citibikeUrl = 'https://feeds.citibikenyc.com/stations/stations.json';
-        $.getJSON(corsProxy+citibikeUrl, function(data){
+      var corsProxy = 'https://crossorigin.me/'; // 'http://cors.io/?'
+      var citibikeUrl = 'https://feeds.citibikenyc.com/stations/stations.json';
+        $.ajax({
+        url: corsProxy+citibikeUrl,
+        dataType: 'json',
+        data: {},
+        success: function(data){
           if (data) {
             loadStations(data);
           } else {
             console.log("No stations retrieved");
             $.getJSON('static/js/stations.json', loadStations);
           }
-        });
-      } catch (err) {
-        console.log("Failed to fetch latest stations");
-        $.getJSON('static/js/stations.json', loadStations);
-      }
+        },
+        timeout: 3000,
+        error: function(jqXHR, status, errorThrown) {
+          console.log("Failed to fetch latest stations");
+          $.getJSON('static/js/stations.json', loadStations);
+        }
+      });
     }
 
     function getLocation(callback) {
