@@ -116,13 +116,20 @@
       return i*i + j*j;
     }
 
-    function findNearestStation(lat,lng) {
+    function findNearestStation(lat, lng, checkAvailableBikes, checkAvailableDocks) {
       var min_distance = 99999;
       var closest_station_id;
       $.each(stations.stationBeanList, function(i, station) {
         var distance = getDistance(lat,lng, station.latitude, station.longitude);
 
-        if (distance < min_distance) {
+        var hasBikes = checkAvailableBikes ? station.availableBikes > 0 : true;
+        var hasDocks = checkAvailableDocks ? station.availableDocks > 0 : true;
+
+        if (!station.testStation &&
+            station.statusKey == 1 &&
+            hasBikes &&
+            hasDocks &&
+            distance < min_distance) {
           min_distance = distance;
           closest_station_id = i;
         }
@@ -288,8 +295,8 @@
       var end_lng = end.geometry.location.lng();
       var end_p = new google.maps.LatLng(end_lat, end_lng);
 
-      var start_station = findNearestStation(start_lat,start_lng);
-      var end_station = findNearestStation(end_lat,end_lng);
+      var start_station = findNearestStation(start_lat, start_lng, true, false);
+      var end_station = findNearestStation(end_lat, end_lng, false, true);
       var start_station_p = new google.maps.LatLng(start_station.latitude, start_station.longitude);
       var end_station_p = new google.maps.LatLng(end_station.latitude, end_station.longitude);
 
